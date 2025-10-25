@@ -1,7 +1,7 @@
 
-  # Greenwash Score UI
+  # Greenwash Score UI (Copy)
 
-  This is a code bundle for Greenwash Score UI. The original project is available at https://www.figma.com/design/ICwnviK376pj4Ce5sDDlJ0/Greenwash-Score-UI.
+  This is a code bundle for Greenwash Score UI (Copy). The original project is available at https://www.figma.com/design/cfvUvWGaEf5siLNcIbfdAt/Greenwash-Score-UI--Copy-.
 
   ## Running the code
 

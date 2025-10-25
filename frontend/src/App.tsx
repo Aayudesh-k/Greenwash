@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SearchForm } from './components/SearchForm';
 import { ExecutiveSummary } from './components/ExecutiveSummary';
 import { DetailedAnalysis } from './components/DetailedAnalysis';
@@ -7,6 +7,15 @@ import { Header } from './components/Header';
 export default function App() {
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const handleSearch = async (companyName: string) => {
     setIsLoading(true);
@@ -99,13 +108,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/20">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
       
       <main className="container mx-auto px-8 py-8 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-slate-900 mb-2">Supply Chain Sustainability Analysis</h1>
-          <p className="text-slate-600">
+          <h1 className="text-slate-900 dark:text-slate-100 mb-2">Supply Chain Sustainability Analysis</h1>
+          <p className="text-slate-600 dark:text-slate-400">
             AI-powered verification of corporate sustainability claims through real-time supply chain data analysis
           </p>
         </div>
@@ -114,16 +123,16 @@ export default function App() {
         
         {isLoading && (
           <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"></div>
               <p>Analyzing ESG reports and sustainability claims...</p>
             </div>
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
               <p>Cross-referencing supply chain data...</p>
             </div>
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
               <p>Processing satellite imagery and deforestation data...</p>
             </div>
           </div>

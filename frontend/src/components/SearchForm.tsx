@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Search } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Search } from "lucide-react";
 
 interface SearchFormProps {
   onSearch: (companyName: string) => void;
@@ -9,7 +9,7 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
-  const [companyName, setCompanyName] = useState('');
+  const [companyName, setCompanyName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +33,12 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
               disabled={isLoading}
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading || !companyName.trim()}
             className="h-12 px-8 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 dark:from-emerald-500 dark:to-teal-500 dark:hover:from-emerald-600 dark:hover:to-teal-600 shadow-sm"
           >
-            {isLoading ? 'Analyzing...' : 'Analyze'}
+            {isLoading ? "Analyzing..." : "Analyze"}
           </Button>
         </div>
       </div>

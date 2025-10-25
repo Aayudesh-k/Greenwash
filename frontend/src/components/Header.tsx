@@ -1,6 +1,7 @@
-import { Bell, Settings, User, Moon, Sun } from 'lucide-react';
-import { Button } from './ui/button';
-import { Logo } from './Logo';
+import React from "react";
+import { Bell, Settings, User, Moon, Sun } from "lucide-react";
+import { Button } from "./ui/button";
+import { Logo } from "./Logo";
 
 interface HeaderProps {
   darkMode: boolean;
@@ -15,31 +16,67 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
           <div className="flex items-center gap-3">
             <Logo className="w-9 h-9" />
             <div>
-              <div className="text-slate-900 dark:text-slate-100">GreenWash</div>
-              <div className="text-slate-500 dark:text-slate-400">Analytics</div>
+              <div className="text-slate-900 dark:text-slate-100">
+                Green Watch
+              </div>
+              <div className="text-slate-500 dark:text-slate-400">
+                Analytics
+              </div>
             </div>
           </div>
-          
+
           <nav className="hidden md:flex items-center gap-1">
-            <a href="#" className="px-4 py-2 text-slate-900 dark:text-slate-100 rounded-lg bg-slate-50 dark:bg-slate-800">Dashboard</a>
-            <a href="#" className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Reports</a>
-            <a href="#" className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">API</a>
-            <a href="#" className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Docs</a>
+            <a
+              href="#"
+              className="px-4 py-2 text-slate-900 dark:text-slate-100 rounded-lg bg-slate-50 dark:bg-slate-800"
+            >
+              Dashboard
+            </a>
+            <a
+              href="#"
+              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              Reports
+            </a>
+            <a
+              href="#"
+              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              API
+            </a>
+            <a
+              href="#"
+              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              Docs
+            </a>
           </nav>
-          
+
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
               onClick={() => setDarkMode(!darkMode)}
             >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {darkMode ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </Button>
-            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
               <Bell className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
               <Settings className="w-5 h-5" />
             </Button>
             <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center ml-2">

@@ -26,7 +26,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
             <Input
               type="text"
-              placeholder="Enter company name (e.g., Unilever, Nestlé, PepsiCo)"
+              placeholder="Enter company name (e.g., Apple, PepsiCo, Chevron)"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               className="pl-12 h-12 bg-slate-50/50 dark:bg-slate-800/50 border-slate-200/60 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-300 dark:focus:border-emerald-600 focus:ring-emerald-100 dark:focus:ring-emerald-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"

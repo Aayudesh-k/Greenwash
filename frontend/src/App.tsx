@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { SearchForm } from "./components/SearchForm";
 import { ExecutiveSummary } from "./components/ExecutiveSummary";
-import { DetailedAnalysis } from "./components/DetailedAnalysis";
 import { Header } from "./components/Header";
+import { Card } from "./components/ui/card";
+import { ApiService } from "./services/api";
+import { AnalysisResponse } from "./types";
 
 export default function App() {
-  const [results, setResults] = useState(null);
+  const [analysisData, setAnalysisData] = useState<AnalysisResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -19,265 +22,114 @@ export default function App() {
 
   const handleSearch = async (companyName: string) => {
     setIsLoading(true);
+    setError(null);
+    setAnalysisData(null);
 
-    // Simulate API call with mock data
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Mock results - in production, this would come from your AI analysis backend
-    const mockResults = {
-      companyName,
-      ticker: "MOCK",
-      industry: "Consumer Goods",
-      greenWatchScore: Math.floor(Math.random() * 100),
-      riskLevel: ["Low", "Medium", "High", "Critical"][
-        Math.floor(Math.random() * 4)
-      ],
-      lastUpdated: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      claims: [
-        {
-          claim: "Net zero emissions by 2030",
-          verified: Math.random() > 0.5,
-          confidence: Math.floor(Math.random() * 40) + 60,
-          status: "Under Investigation",
+    try {
+      // Submit analysis request
+      const submitResponse = await ApiService.submitAnalysis(companyName);
+      
+      // Start polling for results
+      ApiService.pollAnalysisStatus(
+        submitResponse.task_id,
+        (data: AnalysisResponse) => {
+          console.log("Received analysis data:", data);
+          setAnalysisData(data);
+          if (data.status === 'completed' || data.status === 'failed') {
+            setIsLoading(false);
+          }
         },
-        {
-          claim: "Zero deforestation supply chain",
-          verified: Math.random() > 0.5,
-          confidence: Math.floor(Math.random() * 40) + 60,
-          status: "Partially Verified",
-        },
-        {
-          claim: "100% renewable energy by 2025",
-          verified: Math.random() > 0.5,
-          confidence: Math.floor(Math.random() * 40) + 60,
-          status: "Verified",
-        },
-        {
-          claim: "Sustainable sourcing certification",
-          verified: Math.random() > 0.5,
-          confidence: Math.floor(Math.random() * 40) + 60,
-          status: "Disputed",
-        },
-      ],
-      insights: [
-        {
-          severity: "critical",
-          title: "Supply chain data inconsistency",
-          description:
-            "Satellite imagery shows 40% increase in deforestation activity in supplier regions, contradicting zero-deforestation claims.",
-        },
-        {
-          severity: "high",
-          title: "Carbon offset verification gap",
-          description:
-            "Carbon offset programs lack third-party verification from recognized standards (Gold Standard, Verra).",
-        },
-        {
-          severity: "medium",
-          title: "Vague sustainability metrics",
-          description:
-            "ESG report contains ambiguous targets without specific timelines or measurement frameworks.",
-        },
-      ],
-      suppliers: [
-        {
-          id: 1,
-          name: "Global Palm Oil Industries",
-          location: "Riau, Indonesia",
-          commodity: "Palm Oil",
-          riskScore: 87,
-          emissions: 12500,
-          deforestationLink: true,
-          volume: 45000,
-        },
-        {
-          id: 2,
-          name: "Amazon Timber Corporation",
-          location: "Pará, Brazil",
-          commodity: "Timber",
-          riskScore: 94,
-          emissions: 8900,
-          deforestationLink: true,
-          volume: 28000,
-        },
-        {
-          id: 3,
-          name: "Sustainable Cocoa Cooperative",
-          location: "Ashanti, Ghana",
-          commodity: "Cocoa",
-          riskScore: 23,
-          emissions: 2100,
-          deforestationLink: false,
-          volume: 15000,
-        },
-        {
-          id: 4,
-          name: "Pacific Soy Trading Ltd.",
-          location: "Chaco, Argentina",
-          commodity: "Soy",
-          riskScore: 71,
-          emissions: 5600,
-          deforestationLink: true,
-          volume: 32000,
-        },
-        {
-          id: 5,
-          name: "Tropical Rubber Plantations",
-          location: "Sarawak, Malaysia",
-          commodity: "Rubber",
-          riskScore: 68,
-          emissions: 4200,
-          deforestationLink: false,
-          volume: 18000,
-        },
-        {
-          id: 6,
-          name: "East African Coffee Growers",
-          location: "Sidamo, Ethiopia",
-          commodity: "Coffee",
-          riskScore: 19,
-          emissions: 1800,
-          deforestationLink: false,
-          volume: 8500,
-        },
-      ],
-      commodities: [
-        {
-          name: "Palm Oil",
-          volume: 45000,
-          percentOfTotal: 32,
-          deforestationRisk: "Critical",
-          trend: "increasing",
-          emissions: 12500,
-        },
-        {
-          name: "Soy",
-          volume: 32000,
-          percentOfTotal: 23,
-          deforestationRisk: "High",
-          trend: "stable",
-          emissions: 5600,
-        },
-        {
-          name: "Timber",
-          volume: 28000,
-          percentOfTotal: 20,
-          deforestationRisk: "Critical",
-          trend: "increasing",
-          emissions: 8900,
-        },
-        {
-          name: "Rubber",
-          volume: 18000,
-          percentOfTotal: 13,
-          deforestationRisk: "Medium",
-          trend: "decreasing",
-          emissions: 4200,
-        },
-        {
-          name: "Cocoa",
-          volume: 15000,
-          percentOfTotal: 11,
-          deforestationRisk: "Low",
-          trend: "stable",
-          emissions: 2100,
-        },
-        {
-          name: "Coffee",
-          volume: 8500,
-          percentOfTotal: 6,
-          deforestationRisk: "Low",
-          trend: "decreasing",
-          emissions: 1800,
-        },
-      ],
-      quantitativeData: {
-        totalEmissions: 35100,
-        emissionsChange: 12.4,
-        deforestationArea: 1847,
-        deforestationChange: 39.8,
-        waterUsage: 187500,
-        waterChange: -8.2,
-        wasteGenerated: 4200,
-        wasteChange: 5.1,
-        emissionsBySupplier: [
-          { supplier: "Global Palm Oil", emissions: 12500 },
-          { supplier: "Amazon Timber", emissions: 8900 },
-          { supplier: "Pacific Soy", emissions: 5600 },
-          { supplier: "Tropical Rubber", emissions: 4200 },
-          { supplier: "Cocoa Cooperative", emissions: 2100 },
-          { supplier: "Coffee Growers", emissions: 1800 },
-        ],
-        deforestationTrend: [
-          { year: "2020", area: 1120, baseline: 1000 },
-          { year: "2021", area: 1320, baseline: 1000 },
-          { year: "2022", area: 1580, baseline: 1000 },
-          { year: "2023", area: 1847, baseline: 1000 },
-        ],
-        emissionsByCategory: [
-          { category: "Supply Chain", value: 24500, percent: 69.8 },
-          { category: "Operations", value: 7200, percent: 20.5 },
-          { category: "Transportation", value: 2400, percent: 6.8 },
-          { category: "Other", value: 1000, percent: 2.8 },
-        ],
-      },
-      dataSource:
-        "Analysis compiled from ESG reports, Trase supply chain data, Global Forest Watch satellite imagery, and third-party audit reports.",
-    };
-
-    setResults(mockResults);
-    setIsLoading(false);
+        (error: string) => {
+          setError(error);
+          setIsLoading(false);
+        }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start analysis');
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <main className="container mx-auto px-8 py-8 max-w-7xl">
+      <main className="container mx-auto px-8 py-8">
         <div className="mb-8">
           <h1 className="text-slate-900 dark:text-slate-100 mb-2">
-            Supply Chain Sustainability Analysis
+            ESG Greenwashing Detection
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             AI-powered verification of corporate sustainability claims through
-            real-time supply chain data analysis
+            real-time web research and evidence analysis
           </p>
         </div>
 
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
         {isLoading && (
-          <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"></div>
-              <p>Analyzing ESG reports and sustainability claims...</p>
-            </div>
-            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-              <div
-                className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-              <p>Cross-referencing supply chain data...</p>
-            </div>
-            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-              <div
-                className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"
-                style={{ animationDelay: "0.4s" }}
-              ></div>
-              <p>Processing satellite imagery and deforestation data...</p>
-            </div>
+          <div className="mt-12 space-y-6">
+            <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm">
+              <h3 className="text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <div className="w-5 h-5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"></div>
+                AI Analysis in Progress
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"></div>
+                  <p>🔍 Analyzing ESG reports and extracting key themes...</p>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <div
+                    className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                  <p>📋 Identifying specific sustainability claims...</p>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <div
+                    className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.4s" }}
+                  ></div>
+                  <p>🌐 Searching web for verification evidence...</p>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <div
+                    className="w-1.5 h-1.5 bg-blue-600 dark:bg-emerald-500 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.6s" }}
+                  ></div>
+                  <p>🧠 AI analyzing evidence and generating greenwash score...</p>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800 rounded-lg">
+                <p className="text-emerald-700 dark:text-emerald-400 text-sm">
+                  💡 This process typically takes 30-60 seconds as our AI thoroughly investigates each claim
+                </p>
+              </div>
+            </Card>
           </div>
         )}
 
-        {results && !isLoading && (
-          <>
-            <ExecutiveSummary results={results} />
-            <DetailedAnalysis results={results} />
-          </>
+        {error && (
+          <div className="mt-8 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-800 rounded-lg shadow-sm">
+            <p className="text-red-700 dark:text-red-400">
+              Error: {error}
+            </p>
+          </div>
+        )}
+
+        {analysisData && analysisData.status === 'completed' && !isLoading && (
+          <ExecutiveSummary analysisData={analysisData} />
+        )}
+
+        {analysisData && analysisData.status === 'failed' && !isLoading && (
+          <div className="mt-8 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-800 rounded-lg shadow-sm">
+            <p className="text-red-700 dark:text-red-400">
+              Analysis failed: {analysisData.error || 'Unknown error occurred'}
+            </p>
+          </div>
         )}
       </main>
     </div>

@@ -33,7 +33,7 @@ export function ExecutiveSummary({ analysisData }: ExecutiveSummaryProps) {
           <Shield className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
         ),
       };
-    if (score <= 4)
+    if (score <= 5)
       return {
         bg: "bg-amber-50 dark:bg-amber-950/30",
         text: "text-amber-700 dark:text-amber-400",
@@ -43,7 +43,7 @@ export function ExecutiveSummary({ analysisData }: ExecutiveSummaryProps) {
           <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
         ),
       };
-    if (score <= 7)
+    if (score <= 8)
       return {
         bg: "bg-orange-50 dark:bg-orange-950/30",
         text: "text-orange-700 dark:text-orange-400",

@@ -129,12 +129,12 @@ export function ExecutiveSummary({ analysisData }: ExecutiveSummaryProps) {
                 {greenwashScore <= 2 &&
                   "✅ Low concern - Claims appear credible"}
                 {greenwashScore > 2 &&
-                  greenwashScore <= 4 &&
+                  greenwashScore <= 5 &&
                   "⚠️ Moderate concern - Some claims questionable"}
-                {greenwashScore > 4 &&
-                  greenwashScore <= 7 &&
+                {greenwashScore > 5 &&
+                  greenwashScore <= 8 &&
                   "🚨 High concern - Multiple red flags"}
-                {greenwashScore > 7 &&
+                {greenwashScore > 8 &&
                   "🔥 Critical concern - Significant greenwashing detected"}
               </div>
             </div>

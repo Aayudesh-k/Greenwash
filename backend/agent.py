@@ -178,10 +178,13 @@ Claims:
 Instructions:
 1. Focus on measurable programs, targets, or initiatives.
 2. Include the company name if relevant.
-3. Prefer authoritative sources: site:pepsico.com OR site:sbt.org OR site:cdp.net OR official NGO/ESG reports.
-4. Avoid quoting the entire claim; pick key metrics or nouns.
-5. Include optional keywords like "verification", "ESG audit", "report", "criticism", "controversy".
-6. Return a **list of search queries**, one per claim, in the same order.
+3. Prefer **independent, authoritative sources**, such as:
+   - site:sbt.org OR site:cdp.net OR site:un.org OR site:sciencebasedtargets.org OR official NGO or ESG reports.
+4. **Explicitly exclude the company's own website or subsidiaries.**
+   For example, use `-site:{state['company_name'].lower()}.com` or `-site:{state['company_name'].lower()}.co` to filter out self-published pages.
+5. Avoid quoting the entire claim; pick key metrics or nouns.
+6. Include optional keywords like "verification", "ESG audit", "report", "criticism", or "controversy".
+7. Return a **list of search queries**, one per claim, in the same order.
 """
     structured_llm = llm.with_structured_output(SearchQueriesResponse)
     structured_output = structured_llm.invoke(prompt)
@@ -266,14 +269,13 @@ External Evidence:
 {evidence_str}
 
 Instructions:
-1. Only use the evidence provided; do not assume facts not in the evidence.
-2. Evaluate the credibility and relevance of each source (official reports > news > blogs).
-3. Provide a **brief synthesis (2–3 sentences)** explaining your reasoning.
-4. Give a **one-word verdict** from the following:
-   - Verified (evidence directly supports the claim)
+1. Evaluate the credibility and relevance of each source (official reports > news > blogs).
+2. Provide a **brief synthesis (2–3 sentences)** explaining your reasoning.
+3. Give a **one-word verdict** from the following:  
+   - Verified (evidence directly supports or does not contradict the claim)
    - Contradicted (evidence directly contradicts the claim)
    - Unsubstantiated (evidence is irrelevant, insufficient, or does not clearly support or contradict the claim)
-5. If evidence is partial or incomplete, clearly state which aspects are supported or unclear.
+4. If evidence is partial or incomplete, clearly state which aspects are supported or unclear.
 """
         try:
             verdict = structured_llm.invoke(prompt)
@@ -313,17 +315,26 @@ def generate_final_assessment(state: State) -> State:
         ]
     )
     prompt = f"""
-You are a senior ESG auditor. Based on the following analysis of {state['company_name']}'s sustainability claims, provide a final "Greenwash Score" (0–10) and a qualitative summary.  
+You are a senior ESG auditor. Based on the following analysis of {state['company_name']}'s sustainability claims, determine a final "Greenwash Score" (0–10) and provide a concise, evidence-based summary.
 
 Claim Analysis Summary:
 {report_summary}
 
 Instructions:
-1. Score 0 = all claims Verified; 10 = mostly Contradicted or Unsubstantiated.
-2. Explain how the claims' support or lack thereof influenced the score.
-3. Focus on transparency, credibility, and whether claims could be misleading.
-4. Avoid exaggeration or assumptions; base your summary only on the evidence in the report.
-5. Provide a concise qualitative summary (2–3 sentences) along with the numeric score.
+1. Assign a score from 0–10, where:
+   - 0 = all claims are verified and supported by credible, independent evidence.
+   - 10 = most claims are contradicted or clearly misleading based on available data.
+2. Use balanced weighting to reflect relative concern:
+   - Verified = 0
+   - Unsubstantiated = 2
+   - Contradicted = 3
+   Normalize to a 0–10 range for the final score.
+3. Consider both the quantity and severity of unsupported claims. 
+   A few unsubstantiated claims should indicate limited transparency, not major misconduct.
+4. Focus on evidence quality, disclosure completeness, and alignment between stated goals and verified data.
+5. Avoid harsh language or assumptions about intent—maintain a neutral, professional tone.
+6. Provide a short 2–3 sentence summary explaining how the evidence (or lack thereof) shaped the score.
+   Use phrasing that reflects proportional concern (e.g., "low concern," "moderate concern," "noticeable concern," "high concern").
 """
     try:
         assessment_llm = llm.with_structured_output(FinalAssessment)

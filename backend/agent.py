@@ -4,9 +4,9 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
-from langchain_community.tools import DuckDuckGoSearchResults
+from langchain_tavily import TavilySearch
 
-llm = ChatOpenAI(model="gpt-5-nano")
+llm = ChatOpenAI(model="gpt-5-mini")
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 vector_store = Chroma(
@@ -100,23 +100,7 @@ def prepare_context(state: State) -> State:
         ]
     )
 
-    prompt = f"""
-You are an ESG analyst. Summarize and extract the **most relevant excerpts** from the following document chunks that
-are likely to contain measurable, verifiable ESG claims for {state['company_name']}.  
-
-Document Chunks:
-{docs_text}
-
-Instructions:
-1. Only keep the parts likely to contain specific ESG claims or data.
-2. Remove generic marketing text or vague statements.
-3. Provide the summarized context in a single text block.
-"""
-    structured_llm = llm.with_structured_output(ThemesResponse)
-    structured_output = structured_llm.invoke(prompt)
-    summarized_context = "\n".join(structured_output.model_dump().get("themes", []))
-
-    return {**state, "context": summarized_context}
+    return {**state, "context": docs_text}
 
 
 def largest_themes(state: State) -> State:
@@ -177,7 +161,7 @@ Claims:
 
 Instructions:
 1. Focus on measurable programs, targets, or initiatives.
-2. Include the company name if relevant.
+2. Always include the company name {state['company_name']} in each query.
 3. Prefer **independent, authoritative sources**, such as:
    - site:sbt.org OR site:cdp.net OR site:un.org OR site:sciencebasedtargets.org OR official NGO or ESG reports.
 4. **Explicitly exclude the company's own website or subsidiaries.**
@@ -195,22 +179,55 @@ Instructions:
 
 
 def retrieve_evidence(state: State) -> State:
-    print("[Step] Retrieving evidence from web")
+    print("[Step] Retrieving and validating evidence from web")
     queries = state.get("search_queries") or []
     collected_evidence = []
-    search_tool = DuckDuckGoSearchResults(output_format="list")
+    search_tool = TavilySearch(max_results=10, search_depth="advanced")
 
     for claim, query in zip(state.get("claims", []), queries):
         print(f"[Info] Searching for claim: {claim['text']}")
         try:
-            results = search_tool.invoke(query, k=10)
-            for result in results:
+            output = search_tool.invoke(query, k=10)
+            for result in output.get("results", []):
+                url = result.get("url", "").lower()
+
+                if any(
+                    ext in url
+                    for ext in (
+                        ".xlsx",
+                        ".xls",
+                        ".doc",
+                        ".docx",
+                        ".ppt",
+                        ".pptx",
+                        ".zip",
+                        ".rar",
+                        ".jpg",
+                        ".jpeg",
+                        ".png",
+                        ".gif",
+                        ".tiff",
+                        ".bmp",
+                        ".svg",
+                        ".mp4",
+                        ".avi",
+                        ".mov",
+                        ".mp3",
+                        ".wav",
+                        ".exe",
+                        ".bin",
+                        ".iso",
+                    )
+                ):
+                    print(f"[Info] Skipping unsupported file type: {url}")
+                    continue
+
                 collected_evidence.append(
                     {
                         "claim_text": claim["text"],
-                        "snippet": result.get("snippet", ""),
-                        "source": result.get("link", ""),
-                        "weight": 3 if "report" in result.get("link", "") else 2,
+                        "snippet": result.get("content", ""),
+                        "source": url,
+                        "weight": result.get("score", 0),
                     }
                 )
         except Exception as e:
@@ -269,13 +286,14 @@ External Evidence:
 {evidence_str}
 
 Instructions:
-1. Evaluate the credibility and relevance of each source (official reports > news > blogs).
-2. Provide a **brief synthesis (2–3 sentences)** explaining your reasoning.
-3. Give a **one-word verdict** from the following:  
-   - Verified (evidence directly supports or does not contradict the claim)
-   - Contradicted (evidence directly contradicts the claim)
-   - Unsubstantiated (evidence is irrelevant, insufficient, or does not clearly support or contradict the claim)
-4. If evidence is partial or incomplete, clearly state which aspects are supported or unclear.
+1. Review each evidence source carefully.
+2. In your synthesis, **explicitly name or reference the source(s)** that inform your conclusion. For example:
+   - "According to the UN 2023 Environmental Report (un.org/...),"
+   - "A 2024 CDP dataset (cdp.net/...) provides no mention of..."
+   - "Multiple NGO audits (sciencebasedtargets.org, sdg.un.org) confirm..."
+3. Provide a **2–3 sentence synthesis** summarizing how the sources support, contradict, or fail to substantiate the claim.
+4. Give a **one-word verdict** (Verified / Contradicted / Unsubstantiated).
+5. Avoid vague phrasing like “the evidence suggests” — always tie reasoning to specific named sources.
 """
         try:
             verdict = structured_llm.invoke(prompt)
